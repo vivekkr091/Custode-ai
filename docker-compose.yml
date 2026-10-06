@@ -1,0 +1,69 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: custode-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-custode}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-custode_dev_password}
+      POSTGRES_DB: ${POSTGRES_DB:-custode}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-custode} -d ${POSTGRES_DB:-custode}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - custode-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: custode-backend
+    restart: unless-stopped
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+    environment:
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      SECRET_KEY: ${SECRET_KEY:-dev-secret-key-please-change-in-production-min-32-chars}
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-custode}:${POSTGRES_PASSWORD:-custode_dev_password}@postgres:5432/${POSTGRES_DB:-custode}
+      CORS_ORIGINS: '["http://localhost:5173","http://127.0.0.1:5173"]'
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+    networks:
+      - custode-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: development
+    container_name: custode-frontend
+    restart: unless-stopped
+    ports:
+      - "${FRONTEND_PORT:-5173}:5173"
+    environment:
+      VITE_API_BASE_URL: http://localhost:${BACKEND_PORT:-8000}
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    networks:
+      - custode-network
+
+networks:
+  custode-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local

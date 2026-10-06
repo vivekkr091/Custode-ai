@@ -1,0 +1,119 @@
+name: CUSTODE Continuous Integration
+
+on:
+  push:
+    branches: [main, master, develop]
+  pull_request:
+    branches: [main, master, develop]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend-and-security:
+    name: Backend & Security Test Suite
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: custode/backend
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run Backend Tests (Core + Security)
+        run: |
+          pytest tests/ -v --durations=10
+
+      - name: Test Alembic Migrations
+        run: |
+          pytest tests/test_migrations.py -v
+
+  frontend:
+    name: Frontend Test & Production Build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: custode/frontend
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: custode/frontend/package.json
+
+      - name: Install Dependencies
+        run: |
+          npm ci || npm install
+
+      - name: Run Frontend Tests
+        run: |
+          npm test
+
+      - name: Run Production Build
+        run: |
+          npm run build
+
+  python-sdk:
+    name: Python Agent SDK Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: custode/sdk/python
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install SDK Test Requirements
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-asyncio httpx pydantic
+
+      - name: Run Python SDK Tests
+        run: |
+          PYTHONPATH=src pytest tests/ -v
+
+  docker-validation:
+    name: Docker Configuration & Syntax Validation
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: custode
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Validate Development Compose Config
+        run: |
+          docker compose config
+
+      - name: Validate Production Compose Config
+        run: |
+          POSTGRES_USER=admin \
+          POSTGRES_PASSWORD=mock_ci_strong_password \
+          SECRET_KEY=mock_ci_secret_key_minimum_32_characters_long \
+          AUTH_SECRET_KEY=mock_ci_auth_secret_minimum_32_characters_long \
+          docker compose -f docker-compose.prod.yml config
