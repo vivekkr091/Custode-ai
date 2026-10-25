@@ -32,6 +32,7 @@ import { MCPSecurityPage } from './pages/MCPSecurityPage';
 import { BehaviorSecurityPage } from './pages/BehaviorSecurityPage';
 import { IntegrationsPage } from './pages/IntegrationsPage';
 import { SettingsPage } from './pages/SettingsPage';
+import { CollegeBotPage } from './pages/CollegeBotPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { LoadingState } from './components/common/FeedbackStates';
 
@@ -81,6 +82,7 @@ const AppContent: React.FC = () => {
           <Route path="/behavior-security" element={<BehaviorSecurityPage />} />
           <Route path="/integrations" element={<IntegrationsPage />} />
           <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/college-bot" element={<CollegeBotPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </Shell>

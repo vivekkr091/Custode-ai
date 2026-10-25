@@ -9,6 +9,9 @@ from app.runtime.handlers import (
     booking_search_handler,
     echo_handler,
     health_check_handler,
+    ipec_attendance_handler,
+    ipec_fee_payment_handler,
+    ipec_timetable_handler,
     mock_api_get_handler,
     mock_db_read_handler,
     mock_failing_handler,
@@ -41,6 +44,14 @@ class ExecutionRegistry:
         self.register("booking-management-tool:search-available-rooms", booking_search_handler)
         self.register("booking-management-tool:create-booking", booking_create_handler)
         self.register("booking-management-tool:cancel-booking", booking_cancel_handler)
+        # IPEC Ghaziabad Campus Bot registrations
+        self.register("ipec_erp_portal:get_syllabus_and_timetable", ipec_timetable_handler)
+        self.register("ipec_erp_portal:get_attendance_and_grades", ipec_attendance_handler)
+        self.register("ipec_erp_portal:submit_semester_fee", ipec_fee_payment_handler)
+        self.register("ipec-campus-erp-portal:get-syllabus-and-timetable", ipec_timetable_handler)
+        self.register("ipec-campus-erp-portal:get-attendance-and-grades", ipec_attendance_handler)
+        self.register("ipec-campus-erp-portal:submit-semester-fee", ipec_fee_payment_handler)
+
 
     def register(
         self,

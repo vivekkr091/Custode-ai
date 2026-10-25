@@ -137,3 +137,70 @@ def booking_cancel_handler(context: ExecutionContext) -> ExecutionResult:
         },
         metadata={"handler": "booking_cancel_handler", "action_id": str(context.runtime_action_id)},
     )
+
+
+def ipec_timetable_handler(context: ExecutionContext) -> ExecutionResult:
+    """Safe deterministic handler for IPEC Ghaziabad timetable and syllabus."""
+    params = context.get_sanitized_parameters()
+    branch = params.get("branch", "Computer Science & Engineering")
+    sem = params.get("semester", 6)
+    return ExecutionResult(
+        success=True,
+        output={
+            "institution": "Inderprastha Engineering College, Ghaziabad",
+            "academic_year": "2025-2026",
+            "branch": branch,
+            "semester": sem,
+            "schedule": [
+                {"period": 1, "time": "09:00 - 10:00 AM", "subject": "Compiler Design (KCS-601)", "faculty": "Dr. A. K. Sharma", "room": "Block-B 302"},
+                {"period": 2, "time": "10:00 - 11:00 AM", "subject": "Computer Networks (KCS-602)", "faculty": "Prof. Meenakshi Singh", "room": "Block-B 302"},
+                {"period": 3, "time": "11:15 - 12:15 PM", "subject": "Web Technology Lab", "faculty": "Er. Rahul Verma", "room": "Lab 4, CS Dept"},
+                {"period": 4, "time": "01:00 - 02:00 PM", "subject": "Data Analytics & ML", "faculty": "Dr. Vikas Kumar", "room": "Block-B 302"}
+            ],
+            "attendance_requirement": "75% minimum required by AKTU",
+            "verified_by": "IPEC Academic Section"
+        },
+        metadata={"handler": "ipec_timetable_handler", "action_id": str(context.runtime_action_id)},
+    )
+
+
+def ipec_fee_payment_handler(context: ExecutionContext) -> ExecutionResult:
+    """Safe deterministic handler for IPEC Ghaziabad semester fee payment."""
+    params = context.get_sanitized_parameters()
+    return ExecutionResult(
+        success=True,
+        output={
+            "receipt_no": "IPEC-REC-2026-88914",
+            "transaction_status": "PAID_AND_VERIFIED",
+            "student_name": params.get("student_name", "Priya Sharma"),
+            "roll_no": params.get("roll_no", "2100300100088"),
+            "amount_paid_inr": params.get("amount_inr", 65000),
+            "fee_head": params.get("fee_head", "6th Semester Tuition Fee"),
+            "payment_gateway": "HDFC SmartHub Campus Pay",
+            "approval_authorization": "Authorized by Accounts Officer",
+            "timestamp": "2026-10-25T18:15:00Z"
+        },
+        metadata={"handler": "ipec_fee_payment_handler", "action_id": str(context.runtime_action_id)},
+    )
+
+
+def ipec_attendance_handler(context: ExecutionContext) -> ExecutionResult:
+    """Safe deterministic handler for IPEC Ghaziabad student attendance and marks."""
+    params = context.get_sanitized_parameters()
+    return ExecutionResult(
+        success=True,
+        output={
+            "student_roll_no": params.get("roll_no", "2100300100088"),
+            "aggregate_attendance": "84.5%",
+            "status": "ELIGIBLE_FOR_EXAMS",
+            "subject_breakdown": {
+                "Compiler Design": "88%",
+                "Computer Networks": "82%",
+                "Web Technology": "86%",
+                "Data Analytics": "83%"
+            },
+            "sgpa_last_sem": 8.42
+        },
+        metadata={"handler": "ipec_attendance_handler", "action_id": str(context.runtime_action_id)},
+    )
+

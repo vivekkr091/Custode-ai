@@ -6,6 +6,7 @@ import {
   BotIcon,
   ChevronRightIcon,
   CompassIcon,
+  GraduationCapIcon,
   InboxIcon,
   KeyIcon,
   LayersIcon,
@@ -38,6 +39,7 @@ export const Sidebar: React.FC<{
 
   const navItems: NavItem[] = [
     { label: 'Dashboard', path: '/', icon: <ActivityIcon size={18} /> },
+    { label: 'IPEC Campus Bot', path: '/college-bot', icon: <GraduationCapIcon size={18} /> },
     { label: 'Agents', path: '/agents', icon: <BotIcon size={18} /> },
     { label: 'Tools', path: '/tools', icon: <WrenchIcon size={18} /> },
     { label: 'Permissions', path: '/permissions', icon: <LockIcon size={18} /> },

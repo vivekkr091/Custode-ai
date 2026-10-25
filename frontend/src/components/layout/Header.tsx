@@ -80,6 +80,7 @@ export const Header: React.FC<{ onSeedComplete?: () => void }> = ({ onSeedComple
     if (path.startsWith('/approvals')) return 'Human Governance Approval Inbox';
     if (path.startsWith('/executions')) return 'Controlled Execution Layer';
     if (path.startsWith('/audit')) return 'Security Audit Trail';
+    if (path.startsWith('/college-bot')) return 'IPEC Campus AI Chatbot & Control Plane';
     if (path.startsWith('/settings')) return 'Platform Settings & Environment';
     return 'Console';
   };
