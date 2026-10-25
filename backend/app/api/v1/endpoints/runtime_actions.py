@@ -122,24 +122,37 @@ async def create_runtime_action_endpoint(
 
     if authorization:
         parts = authorization.strip().split(" ", 1)
-        if len(parts) != 2 or parts[0].lower() != "bearer":
+        if len(parts) == 2 and parts[0].lower() == "bearer":
+            token = parts[1].strip()
+            if token.startswith(API_KEY_PREFIX):
+                try:
+                    auth_agent = await authenticate_agent_token(session, token)
+                    if auth_agent.organization_id != organization_id:
+                        raise HTTPException(
+                            status_code=status.HTTP_403_FORBIDDEN,
+                            detail="Authenticated agent does not belong to target organization",
+                        )
+                    resolved_agent_id = auth_agent.agent_id
+                except AuthenticationError as e:
+                    raise HTTPException(
+                        status_code=status.HTTP_401_UNAUTHORIZED,
+                        detail=str(e),
+                        headers={"WWW-Authenticate": "Bearer"},
+                    )
+            elif x_agent_id:
+                resolved_agent_id = x_agent_id
+            else:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Agent identity required. Provide agent token or X-Agent-ID header",
+                    headers={"WWW-Authenticate": "Bearer"},
+                )
+        elif x_agent_id:
+            resolved_agent_id = x_agent_id
+        else:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Malformed Authorization header. Format: Bearer <agent-api-key>",
-                headers={"WWW-Authenticate": "Bearer"},
-            )
-        try:
-            auth_agent = await authenticate_agent_token(session, parts[1].strip())
-            if auth_agent.organization_id != organization_id:
-                raise HTTPException(
-                    status_code=status.HTTP_403_FORBIDDEN,
-                    detail="Authenticated agent does not belong to target organization",
-                )
-            resolved_agent_id = auth_agent.agent_id
-        except AuthenticationError as e:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail=str(e),
                 headers={"WWW-Authenticate": "Bearer"},
             )
     elif x_agent_id:
